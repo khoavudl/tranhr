@@ -1,8 +1,19 @@
-name: Build Windows Executable (.exe)
+name: Build & Release Windows Executable (.exe)
 
 on:
-  workflow_dispatch: # Cho phép bấm nút "Run workflow" thủ công trên GitHub Actions
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tên phiên bản release (ví dụ: v1.0.0)'
+        required: true
+        default: 'v1.0.0'
+      release_title:
+        description: 'Tiêu đề bản phát hành'
+        required: false
+        default: 'TaxTool v1.0.0 - Windows Release'
   push:
+    tags:
+      - 'v*'
     branches:
       - main
       - master
@@ -11,9 +22,12 @@ on:
       - '.gitignore'
       - '*.ipynb'
 
+permissions:
+  contents: write
+
 jobs:
   build-windows:
-    name: Build Windows Exe
+    name: Build & Release Windows Exe
     runs-on: windows-latest
 
     steps:
@@ -47,9 +61,30 @@ jobs:
         run: |
           Get-Item -Path dist\TaxTool.exe
 
-      - name: 🚀 Tải lên Artifact (.exe) để tải về
+      - name: 🚀 Tải lên Artifact
         uses: actions/upload-artifact@v4
         with:
           name: TaxTool-Windows-x64
           path: dist/TaxTool.exe
           retention-days: 30
+
+      - name: 🏷️ Xuất bản GitHub Release (Tải trực tiếp không cần đăng nhập)
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+        with:
+          tag_name: ${{ github.event.inputs.tag_name || github.ref_name }}
+          name: ${{ github.event.inputs.release_title || format('TaxTool {0}', github.ref_name) }}
+          body: |
+            ## 🚀 TaxTool - Công Cụ Tự Động Đối Soát Thuế (MST & NPT)
+            
+            ### 📥 Tải ứng dụng:
+            Tải trực tiếp file **`TaxTool.exe`** trong mục **Assets** bên dưới.
+            - Không cần cài đặt Python.
+            - Chạy trực tiếp trên Windows 10/11 (64-bit).
+            
+            ### ✨ Tính năng chính:
+            - **🏢 Cấp Mã Số Thuế (MST)**: Đối soát CCCD tại Cột M, cập nhật MST vào Cột D, phân loại Mẫu 14 (Xanh) và Mẫu 40 (Vàng).
+            - **👨‍👩‍👧 Người Phụ Thuộc (NPT)**: Đối soát CCCD tại Cột K, cập nhật MST vào Cột D, hỗ trợ thuật toán Split-match chống lỗi ngắt trang PDF.
+          files: dist/TaxTool.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
