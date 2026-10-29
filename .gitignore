@@ -1,0 +1,30 @@
+# Python Virtual Environments
+venv/
+env/
+ENV/
+.venv/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Build & PyInstaller
+build/
+dist/
+*.spec
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Output & Excel / PDF test files
+*_Updated.xlsx
+*.xlsx
+*.xls
+*.pdf
+
+# IDEs
+.idea/
+.vscode/
