@@ -61,11 +61,16 @@ jobs:
         run: |
           Get-Item -Path dist\TaxTool.exe
 
+      - name: 📦 Nén thành file .zip (Tránh bị Firewall / Trình duyệt chặn)
+        run: |
+          Compress-Archive -Path dist\TaxTool.exe -DestinationPath dist\TaxTool-Windows.zip -Force
+          Get-Item -Path dist\TaxTool-Windows.zip
+
       - name: 🚀 Tải lên Artifact
         uses: actions/upload-artifact@v4
         with:
           name: TaxTool-Windows-x64
-          path: dist/TaxTool.exe
+          path: dist/TaxTool-Windows.zip
           retention-days: 30
 
       - name: 🏷️ Xuất bản GitHub Release (Tải trực tiếp không cần đăng nhập)
@@ -77,14 +82,16 @@ jobs:
           body: |
             ## 🚀 TaxTool - Công Cụ Tự Động Đối Soát Thuế (MST & NPT)
             
-            ### 📥 Tải ứng dụng:
-            Tải trực tiếp file **`TaxTool.exe`** trong mục **Assets** bên dưới.
+            ### 📥 Hướng dẫn tải ứng dụng:
+            👉 **Khuyên dùng**: Tải file **`TaxTool-Windows.zip`** bên dưới, sau đó giải nén ra để sử dụng (giúp tránh bị tường lửa doanh nghiệp / trình duyệt chặn tải file .exe).
             - Không cần cài đặt Python.
             - Chạy trực tiếp trên Windows 10/11 (64-bit).
             
             ### ✨ Tính năng chính:
             - **🏢 Cấp Mã Số Thuế (MST)**: Đối soát CCCD tại Cột M, cập nhật MST vào Cột D, phân loại Mẫu 14 (Xanh) và Mẫu 40 (Vàng).
             - **👨‍👩‍👧 Người Phụ Thuộc (NPT)**: Đối soát CCCD tại Cột K, cập nhật MST vào Cột D, hỗ trợ thuật toán Split-match chống lỗi ngắt trang PDF.
-          files: dist/TaxTool.exe
+          files: |
+            dist/TaxTool-Windows.zip
+            dist/TaxTool.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
